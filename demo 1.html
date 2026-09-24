@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HachDueSlide — Presentation Prototype</title>
+<style>
+:root{--bg:#07111f;--card:#0d1b2e;--card2:#10243b;--text:#f7fbff;--muted:#9fb1c7;--accent:#66e3c4;--accent2:#7aa7ff}
+*{box-sizing:border-box}html,body{margin:0;height:100%;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--text)}
+body{overflow:hidden}.app{height:100vh;display:flex;flex-direction:column}
+header{height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;border-bottom:1px solid #ffffff14;background:#07111feF;z-index:5}
+.logo{font-weight:801;letter-spacing:.2px}.logo span{color:var(--accent)}
+.actions{display:flex;gap:9px}.btn{border:1px solid #ffffff18;background:#ffffff0a;color:#fff;padding:9px 13px;border-radius:10px;cursor:pointer;font-weight:650}.btn:hover{background:#ffffff15}.primary{background:var(--accent);color:#06131b;border-color:transparent}
+main{flex:1;display:grid;grid-template-columns:250px 1fr;min-height:0}
+aside{border-right:1px solid #ffffff12;padding:15px;overflow:auto;background:#081525}
+.thumb{width:100%;aspect-ratio:16/9;background:var(--card);border:1px solid #ffffff12;border-radius:10px;margin-bottom:12px;padding:10px;cursor:pointer;color:#d9e5f2;text-align:left}.thumb.active{border:2px solid var(--accent);padding:9px}.thumb b{font-size:12px}.thumb small{display:block;color:var(--muted);margin-top:6px}
+.stage{display:flex;align-items:center;justify-content:center;padding:28px;overflow:auto;background:radial-gradient(circle at 50% 35%,#173456 0,#07111f 55%)}
+.slide{width:min(1100px,90vw);aspect-ratio:16/9;background:linear-gradient(135deg,#0e2035,#091523);border:1px solid #ffffff16;border-radius:18px;box-shadow:0 30px 90px #0008;padding:7%;position:relative;overflow:hidden}
+.slide:after{content:"";position:absolute;width:330px;height:330px;border-radius:50%;right:-140px;top:-150px;background:#66e3c41a;filter:blur(5px)}
+.kicker{color:var(--accent);font-weight:800;letter-spacing:1.8px;text-transform:uppercase;font-size:13px}
+h1{font-size:clamp(36px,5vw,76px);line-height:1.02;margin:14px 0}.subtitle{font-size:clamp(16px,2vw,25px);color:var(--muted);max-width:760px;line-height:1.45}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:35px}.feature{background:#ffffff08;border:1px solid #ffffff12;padding:20px;border-radius:16px}.feature strong{display:block;margin-bottom:8px}.feature p{color:var(--muted);font-size:14px;line-height:1.45;margin:0}
+.big{font-size:clamp(42px,6vw,80px);font-weight:850}.metric{font-size:14px;color:var(--muted)}
+.footer{position:absolute;bottom:24px;left:7%;right:7%;display:flex;justify-content:space-between;color:#7f94aa;font-size:12px}
+.bullets{margin-top:28px;display:grid;gap:13px;max-width:780px}.bullet{padding:16px 18px;background:#ffffff08;border:1px solid #ffffff12;border-radius:12px}.bullet b{color:var(--accent)}
+.note{color:var(--muted);font-size:13px;margin-top:15px}
+@media(max-width:800px){main{grid-template-columns:1fr}aside{display:none}.stage{padding:12px}.slide{width:96vw}.grid{grid-template-columns:1fr 1fr}}
+@media print{
+ header,aside{display:none!important}.stage{padding:0;background:#fff}.slide{width:100vw;height:56.25vw;border:0;border-radius:0;box-shadow:none;page-break-after:always}
+ body{background:white;overflow:visible}.app{height:auto}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="logo">Hach<span>Due</span>Slide <small style="color:#7890a8">Prototype</small></div>
+  <div class="actions">
+    <button class="btn" onclick="prev()">←</button>
+    <button class="btn" onclick="next()">→</button>
+    <button class="btn" onclick="downloadApp()">Download App</button>
+    <button class="btn primary" onclick="printDeck()">Download Presentation</button>
+  </div>
+</header>
+<main>
+<aside id="thumbs"></aside>
+<section class="stage"><div id="slide" class="slide"></div></section>
+</main>
+</div>
+<script>
+const slides=[
+{title:"HachDueSlide",kicker:"Presentation prototype",subtitle:"A clean, fast slide workspace designed to turn ideas into presentation-ready stories.",type:"hero"},
+{title:"The idea",kicker:"01 · Problem",subtitle:"Presentations often become a collection of disconnected slides. HachDueSlide focuses on structure first, then visual polish.",type:"bullets",items:[
+["Structure","Organize the story before styling each slide."],["Speed","Start from a ready-to-present layout instead of a blank canvas."],["Clarity","Keep the key message visible and easy to scan."]]},
+{title:"Core experience",kicker:"02 · Product",type:"features",features:[
+["Plan","Build a slide sequence with a clear narrative."],["Design","Use consistent typography, spacing and visual hierarchy."],["Present","Preview the full deck and export it for sharing."]]},
+{title:"Prototype flow",kicker:"03 · Workflow",subtitle:"From a rough idea to a presentation in four simple steps.",type:"flow",steps:[
+["01","Create","Start a new deck."],["02","Arrange","Build the story slide by slide."],["03","Preview","Review the presentation mode."],["04","Export","Download or print the finished deck."]]},
+{title:"Key value",kicker:"04 · Outcome",type:"metrics",metrics:[
+["01","Faster setup","Less time spent formatting from scratch."],["02","Consistent","A unified visual language across slides."],["03","Ready","Presentation view and print/PDF export built in."]]},
+{title:"Thank you",kicker:"05 · End",subtitle:"HachDueSlide — a single-file presentation prototype.",type:"end"}
+];
+let current=0;
+function render(){
+ const s=slides[current], el=document.getElementById("slide");
+ let body=`<div class="kicker">${s.kicker}</div><h1>${s.title}</h1>`;
+ if(s.subtitle) body+=`<div class="subtitle">${s.subtitle}</div>`;
+ if(s.type==="features") body+=`<div class="grid">${s.features.map(x=>`<div class="feature"><strong>${x[0]}</strong><p>${x[1]}</p></div>`).join("")}</div>`;
+ if(s.type==="bullets") body+=`<div class="bullets">${s.items.map(x=>`<div class="bullet"><b>${x[0]}</b> — ${x[1]}</div>`).join("")}</div>`;
+ if(s.type==="flow") body+=`<div class="grid">${s.steps.map(x=>`<div class="feature"><div class="big">${x[0]}</div><strong>${x[1]}</strong><p>${x[2]}</p></div>`).join("")}</div>`;
+ if(s.type==="metrics") body+=`<div class="grid">${s.metrics.map(x=>`<div class="feature"><div class="big">${x[0]}</div><strong>${x[1]}</strong><p>${x[2]}</p></div>`).join("")}</div>`;
+ if(s.type==="hero") body+=`<div class="note">Use ← / → to navigate · Press F for fullscreen · Download Presentation to print/save as PDF.</div>`;
+ body+=`<div class="footer"><span>HachDueSlide</span><span>${current+1} / ${slides.length}</span></div>`;
+ el.innerHTML=body;
+ document.querySelectorAll(".thumb").forEach((x,i)=>x.classList.toggle("active",i===current));
+}
+function makeThumbs(){document.getElementById("thumbs").innerHTML=slides.map((s,i)=>`<button class="thumb ${i===0?'active':''}" onclick="go(${i})"><b>${String(i+1).padStart(2,"0")} · ${s.title}</b><small>${s.kicker}</small></button>`).join("")}
+function go(i){current=Math.max(0,Math.min(slides.length-1,i));render()}
+function next(){go(current+1)} function prev(){go(current-1)}
+function printDeck(){
+ const old=current; const all=slides.map((_,i)=>i);
+ const root=document.getElementById("slide"); const backup=root.innerHTML;
+ let pages="";
+ all.forEach(i=>{current=i;render();pages+=`<div class="slide">${root.innerHTML}</div>`});
+ root.innerHTML=pages; window.print(); current=old; render();
+}
+function downloadApp(){
+ const html='<!DOCTYPE html>\\n'+document.documentElement.outerHTML;
+ const blob=new Blob([html],{type:"text/html"}), a=document.createElement("a");
+ a.href=URL.createObjectURL(blob);a.download="hachdueslide-index.html";a.click();URL.revokeObjectURL(a.href);
+}
+document.addEventListener("keydown",e=>{if(e.key==="ArrowRight")next();if(e.key==="ArrowLeft")prev();if(e.key.toLowerCase()==="f")document.documentElement.requestFullscreen?.()});
+makeThumbs();render();
+</script>
+</body>
+</html>
