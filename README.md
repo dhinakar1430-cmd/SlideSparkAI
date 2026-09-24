@@ -1,1 +1,1 @@
-# AI-PPT
+# SlideSparkAI
